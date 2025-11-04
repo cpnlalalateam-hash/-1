@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>魂の犬種診断テスト</title>
+<style>
+body {
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #333;
+}
+section {
+  background: #fff;
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-width: 700px;
+}
+button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:hover {
+  background: #2563eb;
+}
+label { display: block; margin: 5px 0; }
+#result { display: none; text-align: center; }
+#affinity-section { display: none; margin-top: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>🐾 魂の犬種診断テスト 🐾</h1>
+
+<section id="quiz-area">
+  <p>お名前（任意）: <input type="text" id="user-name" placeholder="例：三太"></p>
+
+  <p><strong>Q1.</strong> 初対面の人と話すのは？<br>
+    <label><input type="radio" name="q1" value="E">得意（すぐ打ち解ける）</label>
+    <label><input type="radio" name="q1" value="I">苦手（時間がかかる）</label>
+  </p>
+
+  <p><strong>Q2.</strong> 新しいことを始めるときは？<br>
+    <label><input type="radio" name="q2" value="S">現実的に手順を考える</label>
+    <label><input type="radio" name="q2" value="N">直感で動くタイプ</label>
+  </p>
+
+  <p><strong>Q3.</strong> どちらを重視する？<br>
+    <label><input type="radio" name="q3" value="T">論理と事実</label>
+    <label><input type="radio" name="q3" value="F">感情と共感</label>
+  </p>
+
+  <p><strong>Q4.</strong> 予定は？<br>
+    <label><input type="radio" name="q4" value="J">きっちり立てたい</label>
+    <label><input type="radio" name="q4" value="P">その場の流れで動く</label>
+  </p>
+
+  <p><strong>Q5.</strong> 集団での立ち位置は？<br>
+    <label><input type="radio" name="q5" value="E">中心で話を盛り上げる</label>
+    <label><input type="radio" name="q5" value="I">静かに聞いている</label>
+  </p>
+
+  <p><strong>Q6.</strong> 問題に直面したときは？<br>
+    <label><input type="radio" name="q6" value="S">現実的な対処を考える</label>
+    <label><input type="radio" name="q6" value="N">全体の意味を考える</label>
+  </p>
+
+  <p><strong>Q7.</strong> プロジェクトの進め方は？<br>
+    <label><input type="radio" name="q7" value="T">合理的に管理する</label>
+    <label><input type="radio" name="q7" value="F">仲間との協調を優先する</label>
+  </p>
+
+  <div style="text-align:center;">
+    <button onclick="diagnose()">診断する</button>
+    <button onclick="resetQuiz()" style="background:#888;margin-left:10px;">リセット</button>
+  </div>
+</section>
+
+<section id="result">
+  <h2 id="diagnosed-name"></h2>
+  <p id="dog-type-catchphrase" style="font-weight:bold;"></p>
+  <div id="dog-type-detail"></div>
+
+  <div id="affinity-section">
+    <hr>
+    <h3>🐶 相性診断 🐶</h3>
+    <p>相手のタイプコードを入力してください（例: ENFP）</p>
+    <input type="text" id="partner-code" maxlength="4" style="text-transform:uppercase;">
+    <button onclick="checkAffinity()">相性を見る</button>
+    <div id="affinity-result-text" style="margin-top:10px;"></div>
+  </div>
+</section>
+
+<script>
+const DOG_TYPES = {
+"ISTJ": { name: "ドーベルマン", catchphrase: "規律を重んじる論理的な守護犬", detail: "あなたの魂は、揺るぎない忠誠心と論理的な思考で成り立っています。信頼した相手には鉄壁の安心感を与える、遅咲きの愛を育みます。", affinity: ["ENFP", "ISFP", "ESTP"], conflict: ["INFP", "ENFJ"] },
+"ESTJ": { name: "ジャーマン・シェパード", catchphrase: "生まれながらのリーダー、統率の犬", detail: "群れをまとめ上げる天性の統率力と、現実的な問題解決能力を持っています。家族や仲間を現実的に支えることに喜びを感じます。", affinity: ["ISFP", "INFP", "ESTJ"], conflict: ["INFJ", "ENTP"] },
+"ISTP": { name: "ジャック・ラッセル・テリア", catchphrase: "瞬発力と好奇心の独立者", detail: "常に身体を動かし、五感で世界を理解する探検家です。ルールや計画に縛られることを嫌い、予測不能な状況でも冷静に対処します。", affinity: ["ESFJ", "ISTP", "ENTP"], conflict: ["ENFJ", "INFJ"] },
+"ESTP": { name: "ボクサー", catchphrase: "場の空気を変える行動派パフォーマー", detail: "その場を楽しむことに全力を注ぐ生粋のエンターテイナーです。理論よりも行動を優先し、その圧倒的な行動力が魅力です。", affinity: ["ISTJ", "ISFP", "ESFP"], conflict: ["INFP", "INTJ"] },
+"INFP": { name: "チワワ", catchphrase: "静かに世界を想う理想の詩人", detail: "内向的で繊細、自分の内面世界を何よりも大切にするロマンチストです。現実よりも理想を追求し、大切な人には深く共感します。", affinity: ["ENFJ", "ENTP", "INFP"], conflict: ["ESTJ", "ESTP"] },
+"ENFP": { name: "ゴールデン・レトリバー", catchphrase: "無限の愛を配る太陽の犬", detail: "際限のない好奇心と前向きな感情で輝いています。論理よりも「共感」と「楽しさ」を優先します。ムードメーカーの役割で群れに活力を与えます。", affinity: ["ISTJ", "INFJ", "ENTJ"], conflict: ["ISTP", "ESTP"] },
+"INFJ": { name: "柴犬", catchphrase: "静かな洞察力を持つ、魂の参謀", detail: "他者の感情を深く読み取る洞察力と、揺るぎない信念を持つ理想家です。心を開くまでに時間がかかり、孤独を愛します。", affinity: ["ENFP", "ENTP", "INFJ"], conflict: ["ESTJ", "ESTP"] },
+"ENFJ": { name: "ラブラドール・レトリバー", catchphrase: "群れを導く、究極の調和主義者", detail: "感情の機微を察知し、群れ全体の幸福を最優先する天性の指導者です。愛情深く、献身的なパートナーになります。", affinity: ["INFP", "INTJ", "ENFJ"], conflict: ["ISTP", "ESTP"] },
+"INTJ": { name: "ロットワイラー", catchphrase: "合理性を追求する孤高の戦略家", detail: "感情を排除した絶対的な合理性と、未来を見通す計画性に支配されています。無駄や非効率を嫌い、長期的な安全と安定を提供します。", affinity: ["ENFJ", "ENTP", "INFP"], conflict: ["ESFP", "ESTP"] },
+"ENTJ": { name: "ワイマラナー", catchphrase: "目標達成の鬼、圧倒的推進力", detail: "常に目標達成のために集団を動かします。優れた論理と強い意志を持ち、効率的な成果を求める指揮官です。", affinity: ["INFP", "INTJ", "ENTJ"], conflict: ["ISFP", "ESFP"] },
+"INTP": { name: "アフガン・ハウンド", catchphrase: "知識の探求者、論理の芸術家", detail: "世界がどう動いているのか、その原理を解明することに喜びを感じます。内向的で、自分の思考を整理する時間を重視。", affinity: ["ESFJ", "ENTP", "INTP"], conflict: ["ESTJ", "ESFP"] },
+"ENTP": { name: "プードル", catchphrase: "議論を楽しむ、知的な変革者", detail: "好奇心の赴くままに行動し、常に新しい可能性を探る知的な遊び人です。独創的で多才ですが、一つのことに長く集中するのは苦手。", affinity: ["ISTJ", "INFJ", "ENFP"], conflict: ["ISFJ", "ESFJ"] },
+"ISFJ": { name: "キャバリア", catchphrase: "群れの調和を守る、献身的な介護者", detail: "群れの平和と秩序を守ることに存在意義を見出します。細部まで気を配り、他者のニーズを察知して行動する「癒やし」の存在です。", affinity: ["ESFP", "ISTP", "ISFJ"], conflict: ["ENTP", "INTJ"] },
+"ESFJ": { name: "マルチーズ", catchphrase: "社交的な女王、愛情表現の達人", detail: "社交的で、誰に対してもオープンに愛情を表現します。共感力が高く、群れの中で誰も孤独にならないよう常に気を配る、社交界のスターです。", affinity: ["ISTP", "INTP", "ESFP"], conflict: ["ENTP", "INTJ"] },
+"ISFP": { name: "パグ", catchphrase: "マイペースな芸術家、五感の表現者", detail: "自分の感情と五感を最優先し、独自の美的感覚に従って行動します。他者の意見に流されず、自由と個性を重んじます。", affinity: ["ESTJ", "ENTJ", "ISFP"], conflict: ["ENFJ", "INFJ"] },
+"ESFP": { name: "ダルメシアン", catchphrase: "注目を集める、エネルギッシュなスター", detail: "あなたは生まれながらのパフォーマーであり、注目を集めることで活力を得ます。瞬間的な感情と楽しさを追求します。", affinity: ["ISTP", "ISFJ", "ESTP"], conflict: ["INTJ", "ENTJ"] }
+};
+
+function determineCode() {
+  const answers = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+  let count = 0;
+  for (let i = 1; i <= 7; i++) {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    if (checked) {
+      answers[checked.value]++;
+      count++;
+    }
+  }
+  if (count !== 7) { alert("⚠️ すべての質問に回答してください。"); return null; }
+  return (answers.E>=answers.I?'E':'I')+(answers.S>=answers.N?'S':'N')+(answers.T>=answers.F?'T':'F')+(answers.J>=answers.P?'J':'P');
+}
+
+function diagnose() {
+  const code = determineCode();
+  if (!code) return;
+  const userName = document.getElementById('user-name').value || 'あなた';
+  const t = DOG_TYPES[code];
+  document.getElementById('diagnosed-name').textContent = `${userName}さんの魂の犬種は...【${t.name}】`;
+  document.getElementById('dog-type-catchphrase').textContent = t.catchphrase;
+  document.getElementById('dog-type-detail').innerHTML = `<p><strong>【${t.name}の核心】</strong></p><p>${t.detail}</p>`;
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  localStorage.setItem('myDogType', code);
+  document.getElementById('affinity-section').style.display = 'block';
+}
+
+function checkAffinity() {
+  const myCode = localStorage.getItem('myDogType');
+  const result = document.getElementById('affinity-result-text');
+  if (!myCode) { result.innerHTML = '<span style="color:red;">⚠️ まず診断を実行してください。</span>'; return; }
+  const partnerCode = document.getElementById('partner-code').value.trim().toUpperCase();
+  if (!partnerCode || !DOG_TYPES[partnerCode]) { result.innerHTML = '<span style="color:red;">⚠️ 相手のコードを正しく入力してください (例: ENFP)</span>'; return; }
+  const me = DOG_TYPES[myCode], p = DOG_TYPES[partnerCode];
+  let msg="";
+  if (myCode===partnerCode) msg='<span style="color:green;">共鳴する盟友！</span><br><strong>同じ魂の犬種なので、言葉以上に理解し合えます。</strong>';
+  else if (me.affinity.includes(partnerCode)) msg='<span style="color:#d04040;">奇跡のコンビネーション！</span><br><strong>お互いの欠点を補い合う最高の関係。</strong>';
+  else if (me.conflict.includes(partnerCode)) msg='<span style="color:#333;">激突のコントラスト...</span><br><strong>価値観が真逆なため衝突しやすい。</strong>';
+  else msg='<span style="color:#4682b4;">穏やかな連携。</span><br><strong>無理なく付き合える良好な関係です。</strong>';
+  result.innerHTML = `<strong>${me.name}</strong> と <strong>${partnerCode} (${p.name})</strong> の相性は：<br>${msg}`;
+}
+
+function resetQuiz() {
+  document.getElementById('quiz-area').style.display='block';
+  document.getElementById('result').style.display='none';
+  document.getElementById('affinity-section').style.display='none';
+  document.getElementById('partner-code').value='';
+  document.getElementById('affinity-result-text').innerHTML='';
+  document.getElementById('user-name').value='';
+  document.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=false);
+  localStorage.removeItem('myDogType');
+}
+document.addEventListener('DOMContentLoaded', resetQuiz);
+</script>
+
+</body>
+</html>
